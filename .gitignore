@@ -1,0 +1,14 @@
+# ── Credenciais / Segredos ─────────────────────────────────────────────────────
+senhas api
+*.env
+.env
+
+# ── Sistema operacional ────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Planejamento / Rascunhos ───────────────────────────────────────────────────
+claude_plan.md
+plan_claude.md
+compass_artifact_wf-*.md

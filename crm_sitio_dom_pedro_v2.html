@@ -1,0 +1,1393 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRM Sítio Dom Pedro — Arquitetura v2</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #F5F2EB;
+  --bg2:       #EDE9DF;
+  --ink:       #1C1B18;
+  --ink2:      #5A5849;
+  --ink3:      #8C8A80;
+  --rule:      #D6D2C6;
+  --accent:    #2D6A4F;
+  --accent2:   #1B4332;
+  --amber:     #92400E;
+  --amber-bg:  #FEF3C7;
+  --coral:     #9A3412;
+  --coral-bg:  #FEE2E2;
+  --violet:    #4C1D95;
+  --violet-bg: #EDE9FE;
+  --teal:      #164E63;
+  --teal-bg:   #CFFAFE;
+  --steel:     #1E3A5F;
+  --steel-bg:  #DBEAFE;
+  --pine:      #14532D;
+  --pine-bg:   #DCFCE7;
+}
+
+body {
+  font-family: 'DM Sans', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── HEADER ── */
+header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 2.5rem 3rem 1.5rem;
+  border-bottom: 1.5px solid var(--rule);
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.hdr-left h1 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 2rem;
+  line-height: 1.15;
+  color: var(--accent2);
+  letter-spacing: -0.01em;
+}
+.hdr-left p {
+  font-size: 0.82rem;
+  color: var(--ink3);
+  margin-top: 0.35rem;
+  font-family: 'DM Mono', monospace;
+  letter-spacing: 0.04em;
+}
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.7rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 2rem;
+  border: 1px solid;
+}
+.badge-green { background: var(--pine-bg); color: var(--pine); border-color: #86EFAC; }
+.badge-amber { background: var(--amber-bg); color: var(--amber); border-color: #FCD34D; }
+.badges { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+
+/* ── TABS ── */
+.tabs {
+  display: flex;
+  gap: 0;
+  padding: 0 3rem;
+  border-bottom: 1.5px solid var(--rule);
+  background: var(--bg);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.tab {
+  font-size: 0.78rem;
+  font-weight: 500;
+  padding: 0.85rem 1.2rem;
+  cursor: pointer;
+  border-bottom: 2.5px solid transparent;
+  color: var(--ink3);
+  transition: all 0.18s;
+  white-space: nowrap;
+  user-select: none;
+  letter-spacing: 0.02em;
+}
+.tab:hover { color: var(--ink); }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* ── PANELS ── */
+.panel { display: none; padding: 2.5rem 3rem; }
+.panel.active { display: block; }
+
+/* ── SECTION LABEL ── */
+.sec-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  color: var(--ink3);
+  text-transform: uppercase;
+  margin-bottom: 0.6rem;
+  margin-top: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+.sec-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--rule);
+}
+.sec-label:first-child { margin-top: 0; }
+
+/* ── ARCH GRID ── */
+.arch-layer {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+  align-items: stretch;
+}
+.arch-arrow {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 28px;
+  color: var(--ink3);
+  font-size: 1.1rem;
+}
+
+.card {
+  flex: 1;
+  min-width: 150px;
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  border: 1px solid;
+  position: relative;
+  transition: transform 0.15s, box-shadow 0.15s;
+  cursor: default;
+}
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+}
+.card .c-title {
+  font-size: 0.8rem;
+  font-weight: 500;
+  line-height: 1.3;
+  margin-bottom: 0.2rem;
+}
+.card .c-sub {
+  font-size: 0.7rem;
+  color: inherit;
+  opacity: 0.75;
+  font-family: 'DM Mono', monospace;
+  line-height: 1.4;
+}
+.card .c-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  border-radius: 3px;
+  padding: 0.1rem 0.35rem;
+  margin-top: 0.45rem;
+  display: inline-block;
+}
+
+/* color variants */
+.cv-teal  { background: var(--teal-bg);   border-color: #67E8F9; color: var(--teal); }
+.cv-teal .c-tag  { background: #A5F3FC; color: var(--teal); }
+
+.cv-violet{ background: var(--violet-bg); border-color: #C4B5FD; color: var(--violet); }
+.cv-violet .c-tag{ background: #DDD6FE; color: var(--violet); }
+
+.cv-amber { background: var(--amber-bg);  border-color: #FCD34D; color: var(--amber); }
+.cv-amber .c-tag { background: #FDE68A; color: var(--amber); }
+
+.cv-coral { background: var(--coral-bg);  border-color: #FCA5A5; color: var(--coral); }
+.cv-coral .c-tag { background: #FECACA; color: var(--coral); }
+
+.cv-pine  { background: var(--pine-bg);   border-color: #86EFAC; color: var(--pine); }
+.cv-pine .c-tag  { background: #BBF7D0; color: var(--pine); }
+
+.cv-steel { background: var(--steel-bg);  border-color: #93C5FD; color: var(--steel); }
+.cv-steel .c-tag { background: #BFDBFE; color: var(--steel); }
+
+/* ── CONFIG PANEL ── */
+.config-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  margin-top: 1rem;
+}
+@media (max-width: 640px) { .config-grid { grid-template-columns: 1fr; } }
+
+.config-card {
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+}
+.config-card h3 {
+  font-size: 0.88rem;
+  font-weight: 500;
+  margin-bottom: 0.75rem;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.config-card h3 .icon {
+  width: 22px; height: 22px;
+  background: var(--bg2);
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+}
+.field-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-bottom: 0.75rem;
+}
+.field-row label {
+  font-size: 0.71rem;
+  color: var(--ink3);
+  font-family: 'DM Mono', monospace;
+  letter-spacing: 0.04em;
+}
+.field-row input, .field-row select {
+  width: 100%;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid var(--rule);
+  border-radius: 7px;
+  font-size: 0.8rem;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'DM Mono', monospace;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.field-row input:focus, .field-row select:focus {
+  border-color: var(--accent);
+}
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.45rem 0;
+  border-bottom: 1px solid var(--rule);
+}
+.toggle-row:last-child { border-bottom: none; }
+.toggle-row span {
+  font-size: 0.78rem;
+  color: var(--ink2);
+}
+.toggle {
+  width: 36px; height: 20px;
+  background: var(--rule);
+  border-radius: 10px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+.toggle.on { background: var(--accent); }
+.toggle::after {
+  content: '';
+  width: 14px; height: 14px;
+  background: #fff;
+  border-radius: 50%;
+  position: absolute;
+  top: 3px; left: 3px;
+  transition: left 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.toggle.on::after { left: 19px; }
+
+/* provider selector */
+.provider-tabs {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 0.9rem;
+}
+.ptab {
+  flex: 1;
+  text-align: center;
+  padding: 0.5rem 0.4rem;
+  border: 1.5px solid var(--rule);
+  border-radius: 8px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: var(--ink3);
+  background: var(--bg);
+}
+.ptab.active {
+  border-color: var(--accent);
+  background: var(--pine-bg);
+  color: var(--pine);
+}
+
+/* ── FUNIL ── */
+.funnel {
+  display: flex;
+  gap: 0;
+  margin: 1rem 0;
+  position: relative;
+}
+.funnel-step {
+  flex: 1;
+  text-align: center;
+  position: relative;
+}
+.funnel-step .f-box {
+  padding: 0.65rem 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 500;
+  border-top: 3px solid;
+  margin: 0 2px;
+  border-radius: 0 0 4px 4px;
+  transition: transform 0.15s;
+  cursor: default;
+}
+.funnel-step .f-box:hover { transform: translateY(-3px); }
+.funnel-step .f-num {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.4rem;
+  display: block;
+}
+.funnel-step .f-label { display: block; margin-top: 0.2rem; }
+.funnel-step .f-arrow {
+  position: absolute;
+  right: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ink3);
+  font-size: 0.9rem;
+  z-index: 1;
+}
+.f1 { border-color: #67E8F9; background: var(--teal-bg); color: var(--teal); }
+.f2 { border-color: #C4B5FD; background: var(--violet-bg); color: var(--violet); }
+.f3 { border-color: #FCD34D; background: var(--amber-bg); color: var(--amber); }
+.f4 { border-color: #86EFAC; background: var(--pine-bg); color: var(--pine); }
+.f5 { border-color: #FCA5A5; background: var(--coral-bg); color: var(--coral); }
+
+/* ── AUTOMATION FLOWS ── */
+.flow-card {
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  padding: 1.1rem 1.4rem;
+  margin-bottom: 0.75rem;
+}
+.flow-card h4 {
+  font-size: 0.82rem;
+  font-weight: 500;
+  margin-bottom: 0.65rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.flow-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  align-items: center;
+}
+.fs {
+  font-size: 0.68rem;
+  font-family: 'DM Mono', monospace;
+  padding: 0.25rem 0.55rem;
+  border-radius: 5px;
+  background: var(--bg2);
+  color: var(--ink2);
+  border: 1px solid var(--rule);
+}
+.fs.trigger { background: var(--teal-bg); color: var(--teal); border-color: #67E8F9; }
+.fs.action  { background: var(--pine-bg); color: var(--pine); border-color: #86EFAC; }
+.fs.wait    { background: var(--amber-bg); color: var(--amber); border-color: #FCD34D; }
+.fs.branch  { background: var(--violet-bg); color: var(--violet); border-color: #C4B5FD; }
+.fs.api     { background: var(--coral-bg); color: var(--coral); border-color: #FCA5A5; }
+.flow-arrow { font-size: 0.7rem; color: var(--ink3); }
+
+/* ── STACK TABLE ── */
+.stack-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+  margin-top: 0.75rem;
+}
+.stack-table th {
+  text-align: left;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.07em;
+  color: var(--ink3);
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1.5px solid var(--rule);
+}
+.stack-table td {
+  padding: 0.55rem 0.75rem;
+  border-bottom: 1px solid var(--rule);
+  vertical-align: top;
+}
+.stack-table tr:last-child td { border-bottom: none; }
+.stack-table tr:hover td { background: var(--bg2); }
+.pill {
+  display: inline-block;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.62rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: 3px;
+}
+.pill-py   { background: #FEF9C3; color: #713F12; border: 1px solid #FDE047; }
+.pill-api  { background: var(--coral-bg); color: var(--coral); border: 1px solid #FCA5A5; }
+.pill-free { background: var(--pine-bg); color: var(--pine); border: 1px solid #86EFAC; }
+.pill-paid { background: var(--amber-bg); color: var(--amber); border: 1px solid #FCD34D; }
+
+/* ── PHASES ── */
+.phases {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-top: 0.75rem;
+}
+@media (max-width: 640px) { .phases { grid-template-columns: 1fr; } }
+.phase-card {
+  border-radius: 12px;
+  padding: 1.2rem 1.3rem;
+  border: 1px solid;
+}
+.ph1 { background: var(--teal-bg);   border-color: #67E8F9; }
+.ph2 { background: var(--amber-bg);  border-color: #FCD34D; }
+.ph3 { background: var(--violet-bg); border-color: #C4B5FD; }
+.phase-card .ph-num {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.6rem;
+  opacity: 0.4;
+}
+.phase-card h4 {
+  font-size: 0.82rem;
+  font-weight: 500;
+  margin: 0.25rem 0 0.6rem;
+}
+.phase-card ul {
+  list-style: none;
+  font-size: 0.73rem;
+  line-height: 1.7;
+  opacity: 0.85;
+}
+.phase-card ul li::before { content: '→ '; opacity: 0.5; }
+
+/* ── STATUS INDICATOR ── */
+.status-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 4px;
+}
+.dot-green { background: #22C55E; }
+.dot-amber { background: #F59E0B; }
+.dot-gray  { background: #9CA3AF; }
+
+/* ── COST BAR ── */
+.cost-section { margin-top: 1rem; }
+.cost-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.75rem;
+}
+.cost-label { width: 140px; color: var(--ink2); flex-shrink: 0; }
+.cost-bar {
+  flex: 1;
+  height: 8px;
+  background: var(--rule);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.cost-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.6s cubic-bezier(.16,1,.3,1);
+}
+.cost-val { width: 60px; text-align: right; font-family: 'DM Mono', monospace; color: var(--ink3); font-size: 0.68rem; }
+
+/* ── WHATSAPP PROVIDER DETAILS ── */
+.provider-detail {
+  display: none;
+}
+.provider-detail.active {
+  display: block;
+}
+.provider-comparison {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+@media (max-width: 640px) { .provider-comparison { grid-template-columns: 1fr; } }
+.prov-card {
+  border-radius: 10px;
+  border: 2px solid var(--rule);
+  padding: 1rem 1.1rem;
+  transition: border-color 0.15s;
+  cursor: pointer;
+}
+.prov-card.selected {
+  border-color: var(--accent);
+  background: var(--pine-bg);
+}
+.prov-card h4 { font-size: 0.85rem; font-weight: 500; margin-bottom: 0.4rem; }
+.prov-card .prov-badge {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.62rem;
+  padding: 0.15rem 0.4rem;
+  background: var(--bg2);
+  border-radius: 3px;
+  color: var(--ink3);
+  margin-bottom: 0.6rem;
+  display: inline-block;
+}
+.prov-card ul {
+  list-style: none;
+  font-size: 0.72rem;
+  line-height: 1.8;
+  color: var(--ink2);
+}
+.prov-card ul li::before { content: '✓ '; color: var(--accent); }
+
+/* responsive */
+@media (max-width: 768px) {
+  header, .tabs, .panel { padding-left: 1.25rem; padding-right: 1.25rem; }
+  .tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .funnel { flex-wrap: wrap; gap: 0.4rem; }
+  .funnel-step { min-width: calc(50% - 0.4rem); }
+  .funnel-step .f-arrow { display: none; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hdr-left">
+    <h1>Sítio Dom Pedro — CRM</h1>
+    <p>ARQUITETURA DO SISTEMA · v2.0 · PYTHON NATIVO</p>
+  </div>
+  <div class="badges">
+    <span class="badge badge-green"><span class="status-dot dot-green"></span>Evolution API</span>
+    <span class="badge badge-green"><span class="status-dot dot-green"></span>Z-API</span>
+    <span class="badge badge-amber">Python 3.11+</span>
+    <span class="badge badge-green">FastAPI · Celery · PostgreSQL</span>
+  </div>
+</header>
+
+<nav class="tabs">
+  <div class="tab active" onclick="switchTab('arquitetura')">Arquitetura</div>
+  <div class="tab" onclick="switchTab('whatsapp')">WhatsApp API</div>
+  <div class="tab" onclick="switchTab('automacoes')">Automações Python</div>
+  <div class="tab" onclick="switchTab('funil')">Funil & Scoring</div>
+  <div class="tab" onclick="switchTab('configuracoes')">Configurações</div>
+  <div class="tab" onclick="switchTab('stack')">Stack & Custos</div>
+</nav>
+
+<!-- ════════════════════════════════════════════
+     PANEL 1 · ARQUITETURA
+════════════════════════════════════════════ -->
+<div class="panel active" id="panel-arquitetura">
+
+  <div class="sec-label">Camada 1 — Captura de leads</div>
+  <div class="arch-layer">
+    <div class="card cv-teal">
+      <div class="c-title">Site / Landing Page</div>
+      <div class="c-sub">React + FastAPI backend</div>
+      <span class="c-tag">Formulário "Verificar Data"</span>
+    </div>
+    <div class="card cv-teal">
+      <div class="c-title">Chatbot de Qualificação</div>
+      <div class="c-sub">Python + OpenAI API</div>
+      <span class="c-tag">Leadster-like · 24h</span>
+    </div>
+    <div class="card cv-teal" style="border: 2px solid var(--accent); background: #D1FAE5;">
+      <div class="c-title" style="color:var(--pine);">WhatsApp / Instagram</div>
+      <div class="c-sub">Evolution API <strong>ou</strong> Z-API</div>
+      <span class="c-tag" style="background:#A7F3D0;color:var(--pine);">⚙ Configurável no frontend</span>
+    </div>
+    <div class="card cv-teal">
+      <div class="c-title">QR Code / Link Direto</div>
+      <div class="c-sub">wa.me + UTM tracking</div>
+      <span class="c-tag">Analytics por canal</span>
+    </div>
+  </div>
+
+  <div class="arch-arrow">↓</div>
+
+  <div class="sec-label">Camada 2 — Core CRM (FastAPI + SQLAlchemy)</div>
+  <div class="arch-layer">
+    <div class="card cv-violet">
+      <div class="c-title">Funil de Vendas</div>
+      <div class="c-sub">5 estágios + lead scoring</div>
+      <span class="c-tag">Pydantic models</span>
+    </div>
+    <div class="card cv-violet">
+      <div class="c-title">Agenda de Eventos</div>
+      <div class="c-sub">Múltiplos espaços + conflitos</div>
+      <span class="c-tag">Detecção automática</span>
+    </div>
+    <div class="card cv-violet">
+      <div class="c-title">Gestão de Contatos</div>
+      <div class="c-sub">Histórico + LGPD</div>
+      <span class="c-tag">Consentimento auditável</span>
+    </div>
+    <div class="card cv-violet">
+      <div class="c-title">Financeiro</div>
+      <div class="c-sub">Parcelas + Pix + boleto</div>
+      <span class="c-tag">Asaas API</span>
+    </div>
+    <div class="card cv-violet">
+      <div class="c-title">Contratos Digitais</div>
+      <div class="c-sub">ZapSign API + templates</div>
+      <span class="c-tag">eSignature WhatsApp</span>
+    </div>
+  </div>
+
+  <div class="arch-arrow">↓</div>
+
+  <div class="sec-label">Camada 3 — Motor de Automações Python (Celery + APScheduler)</div>
+  <div class="arch-layer">
+    <div class="card cv-amber">
+      <div class="c-title">Lembretes Pré-evento</div>
+      <div class="c-sub">90→60→30→15→7→3→1 dias</div>
+      <span class="c-tag">Celery Beat tasks</span>
+    </div>
+    <div class="card cv-amber">
+      <div class="c-title">Cobrança Recorrente</div>
+      <div class="c-sub">5d → 1d → dia vencimento</div>
+      <span class="c-tag">Asaas webhooks</span>
+    </div>
+    <div class="card cv-amber">
+      <div class="c-title">Pós-evento</div>
+      <div class="c-sub">Pesquisa + Google Review</div>
+      <span class="c-tag">D+1, D+3, M+11</span>
+    </div>
+    <div class="card cv-amber">
+      <div class="c-title">Nurturing de Leads</div>
+      <div class="c-sub">Sequência por score</div>
+      <span class="c-tag">Frio / Morno / Quente</span>
+    </div>
+  </div>
+
+  <div class="arch-arrow">↓</div>
+
+  <div class="sec-label">Camada 4 — Adaptadores de API (configuráveis pelo frontend)</div>
+  <div class="arch-layer">
+    <div class="card cv-coral" style="border: 2px solid var(--coral); position: relative;">
+      <div style="position:absolute;top:-8px;left:10px;background:#fff;padding:0 4px;">
+        <span style="font-size:0.62rem;font-family:'DM Mono',monospace;color:var(--coral)">WHATSAPP PROVIDER</span>
+      </div>
+      <div class="c-title">Evolution API</div>
+      <div class="c-sub">Self-hosted · REST · Open Source</div>
+      <span class="c-tag">Grupos + Multi-device</span>
+    </div>
+    <div class="card cv-coral" style="border: 2px solid var(--coral);">
+      <div class="c-title">Z-API</div>
+      <div class="c-sub">SaaS BR · ~R$70/mês</div>
+      <span class="c-tag">Suporte nacional</span>
+    </div>
+    <div class="card cv-coral">
+      <div class="c-title">Asaas API</div>
+      <div class="c-sub">Pix · boleto · cartão</div>
+      <span class="c-tag">Banco Central</span>
+    </div>
+    <div class="card cv-coral">
+      <div class="c-title">ZapSign API</div>
+      <div class="c-sub">Contratos digitais</div>
+      <span class="c-tag">MP 2.200-2/2001</span>
+    </div>
+    <div class="card cv-coral">
+      <div class="c-title">SendGrid / SMTP</div>
+      <div class="c-sub">E-mail transacional</div>
+      <span class="c-tag">Templates Jinja2</span>
+    </div>
+  </div>
+
+  <div class="arch-arrow">↓</div>
+
+  <div class="sec-label">Camada 5 — Persistência & Infraestrutura</div>
+  <div class="arch-layer">
+    <div class="card cv-steel">
+      <div class="c-title">PostgreSQL</div>
+      <div class="c-sub">Leads · eventos · contratos</div>
+      <span class="c-tag">Alembic migrations</span>
+    </div>
+    <div class="card cv-steel">
+      <div class="c-title">Redis</div>
+      <div class="c-sub">Cache + fila Celery</div>
+      <span class="c-tag">Rate limiting</span>
+    </div>
+    <div class="card cv-steel">
+      <div class="c-title">S3 / MinIO</div>
+      <div class="c-sub">Contratos · fotos · docs</div>
+      <span class="c-tag">CDN pré-assinado</span>
+    </div>
+    <div class="card cv-steel">
+      <div class="c-title">Docker Compose</div>
+      <div class="c-sub">Deploy all-in-one</div>
+      <span class="c-tag">VPS BR R$80/mês</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════════
+     PANEL 2 · WHATSAPP API
+════════════════════════════════════════════ -->
+<div class="panel" id="panel-whatsapp">
+
+  <div class="sec-label">Selecionar provedor WhatsApp</div>
+  <p style="font-size:0.8rem;color:var(--ink2);margin-bottom:1rem;">
+    O sistema abstrai ambos os provedores num único adaptador Python. Você alterna via painel sem reescrever código.
+  </p>
+
+  <div class="provider-comparison">
+    <div class="prov-card selected" onclick="selectProvider('evolution')">
+      <h4>🔧 Evolution API</h4>
+      <span class="prov-badge">SELF-HOSTED · OPEN SOURCE</span>
+      <ul>
+        <li>Gratuito (infraestrutura própria)</li>
+        <li>Multi-instância ilimitada</li>
+        <li>Suporte a grupos WhatsApp</li>
+        <li>Webhooks para todos os eventos</li>
+        <li>Multi-device nativo</li>
+        <li>Integração Typebot / n8n nativa</li>
+        <li>Docker image oficial</li>
+        <li>Controle total dos dados (LGPD)</li>
+      </ul>
+    </div>
+    <div class="prov-card" onclick="selectProvider('zapi')">
+      <h4>☁️ Z-API</h4>
+      <span class="prov-badge">SAAS · ~R$70/MÊS</span>
+      <ul>
+        <li>Zero configuração de servidor</li>
+        <li>Dashboard web incluído</li>
+        <li>Suporte nacional em português</li>
+        <li>Uptime garantido (SLA)</li>
+        <li>Sandbox para testes</li>
+        <li>REST API simples e documentada</li>
+        <li>Relatórios de entrega</li>
+        <li>Ideal para início rápido</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="sec-label" style="margin-top:1.5rem;">Interface Python unificada — mesmo código para ambos</div>
+
+  <div class="flow-card">
+    <h4>📄 whatsapp_adapter.py — Abstração do provedor</h4>
+    <div style="background:#1C1B18;border-radius:8px;padding:1rem 1.2rem;margin-top:0.25rem;overflow-x:auto;">
+      <pre style="color:#E8E6DF;font-family:'DM Mono',monospace;font-size:0.71rem;line-height:1.75;white-space:pre;">
+<span style="color:#86EFAC">class</span> <span style="color:#67E8F9">WhatsAppProvider</span>(ABC):
+    <span style="color:#FCD34D">"""Interface comum — Evolution API ou Z-API."""</span>
+
+    <span style="color:#86EFAC">@abstractmethod</span>
+    <span style="color:#86EFAC">async def</span> send_text(self, phone: str, msg: str) → dict: ...
+
+    <span style="color:#86EFAC">@abstractmethod</span>
+    <span style="color:#86EFAC">async def</span> send_template(self, phone: str, template: str, vars: dict) → dict: ...
+
+    <span style="color:#86EFAC">@abstractmethod</span>
+    <span style="color:#86EFAC">async def</span> send_file(self, phone: str, url: str, caption: str) → dict: ...
+
+
+<span style="color:#86EFAC">class</span> <span style="color:#67E8F9">EvolutionAPIProvider</span>(WhatsAppProvider):
+    <span style="color:#FCD34D">"""Evolution API self-hosted."""</span>
+    base_url = settings.EVOLUTION_API_URL   <span style="color:#5A5849"># ex: http://localhost:8080</span>
+    api_key  = settings.EVOLUTION_API_KEY
+    instance = settings.EVOLUTION_INSTANCE
+
+    <span style="color:#86EFAC">async def</span> send_text(self, phone, msg):
+        <span style="color:#86EFAC">return await</span> self._post(
+            f<span style="color:#FCD34D">"/message/sendText/{self.instance}"</span>,
+            {<span style="color:#FCD34D">"number"</span>: phone, <span style="color:#FCD34D">"text"</span>: msg}
+        )
+
+
+<span style="color:#86EFAC">class</span> <span style="color:#67E8F9">ZAPIProvider</span>(WhatsAppProvider):
+    <span style="color:#FCD34D">"""Z-API SaaS."""</span>
+    base_url  = <span style="color:#FCD34D">"https://api.z-api.io/instances"</span>
+    instance  = settings.ZAPI_INSTANCE_ID
+    token     = settings.ZAPI_TOKEN
+
+    <span style="color:#86EFAC">async def</span> send_text(self, phone, msg):
+        <span style="color:#86EFAC">return await</span> self._post(
+            f<span style="color:#FCD34D">"/token/{self.token}/send-text"</span>,
+            {<span style="color:#FCD34D">"phone"</span>: phone, <span style="color:#FCD34D">"message"</span>: msg}
+        )
+
+
+<span style="color:#86EFAC">def</span> <span style="color:#67E8F9">get_whatsapp_provider</span>() → WhatsAppProvider:
+    <span style="color:#FCD34D">"""Factory — lê configuração do banco (editável no frontend)."""</span>
+    config = db.get_setting(<span style="color:#FCD34D">"whatsapp_provider"</span>)
+    <span style="color:#86EFAC">return</span> EvolutionAPIProvider() <span style="color:#86EFAC">if</span> config == <span style="color:#FCD34D">"evolution"</span> <span style="color:#86EFAC">else</span> ZAPIProvider()
+      </pre>
+    </div>
+  </div>
+
+  <div class="sec-label">Webhooks recebidos de ambos os provedores</div>
+  <div class="arch-layer">
+    <div class="card cv-teal">
+      <div class="c-title">messages.upsert</div>
+      <div class="c-sub">Nova mensagem recebida</div>
+      <span class="c-tag">Cria/atualiza lead</span>
+    </div>
+    <div class="card cv-teal">
+      <div class="c-title">messages.ack</div>
+      <div class="c-sub">Status de entrega</div>
+      <span class="c-tag">sent / delivered / read</span>
+    </div>
+    <div class="card cv-teal">
+      <div class="c-title">connection.update</div>
+      <div class="c-sub">Estado da instância</div>
+      <span class="c-tag">Alerta se desconectar</span>
+    </div>
+    <div class="card cv-teal">
+      <div class="c-title">qrcode.updated</div>
+      <div class="c-sub">QR Code para reconexão</div>
+      <span class="c-tag">Exibido no painel</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════════
+     PANEL 3 · AUTOMAÇÕES PYTHON
+════════════════════════════════════════════ -->
+<div class="panel" id="panel-automacoes">
+
+  <p style="font-size:0.8rem;color:var(--ink2);margin-bottom:1.25rem;">
+    Todas as automações rodam em <strong>Python puro</strong> via <strong>Celery + Redis</strong> (tarefas assíncronas) e <strong>APScheduler</strong> (agendamentos recorrentes). Nenhum Make, Zapier ou n8n necessário. Regras editáveis pelo gestor no painel web.
+  </p>
+
+  <div class="sec-label">Fluxo 1 — Lead novo via formulário ou WhatsApp</div>
+  <div class="flow-card">
+    <h4>⚡ Trigger: novo lead capturado</h4>
+    <div class="flow-steps">
+      <span class="fs trigger">FORM / WA recebido</span>
+      <span class="flow-arrow">→</span>
+      <span class="fs action">Cria Lead no PostgreSQL</span>
+      <span class="flow-arrow">→</span>
+      <span class="fs action">Calcula lead score</span>
+      <span class="flow-arrow">→</span>
+      <span class="fs branch">Score ≥ 60?</span>
+      <span class="flow-arrow">→</span>
+      <span class="fs action">WA automático &lt;2min</span>
+      <span class="flow-arrow">→</span>
+      <span class="fs action">Notifica vendedor</span>
+      <span class="flow-arrow">→</span>
+      <span class="fs action">Agenda visita no Google Cal</span>
+    </div>
+  </div>
+
+  <div class="sec-label">Fluxo 2 — Régua de lembretes pré-evento</div>
+  <div class="flow-card">
+    <h4>🗓 Trigger: Celery Beat verifica diariamente às 08:00</h4>
+    <div class="flow-steps">
+      <span class="fs trigger">Celery Beat 08:00</span>
+      <span class="flow-arrow">→</span>
+      <span class="fs action">Query eventos próximos</span>
+      <span class="flow-arrow">→</span>
+      <span class="fs wait">D-90: checklist planejamento</span>
+      <span class="flow-arrow">→</span>
+      <span class="fs wait">D-30: confirmação buffet/fornec.</span>
+      <span class="flow-arrow">→</span>
+      <span class="fs wait">D-7: instruções acesso</span>
+      <span class="flow-arrow">→</span>
+      <span class="fs wait">D-1: checklist final + horários</span>
+      <span class="flow-arrow">→</span>
+      <span class="fs api">WA via Evolution/Z-API</span>
+    </div>
+  </div>
+
+  <div class="sec-label">Fluxo 3 — Cobrança de parcelas</div>
+  <div class="flow-card">
+    <h4>💰 Trigger: Asaas webhook + Celery schedule</h4>
+    <div class="flow-steps">
+      <span class="fs trigger">Parcela gerada no Asaas</span>
+      <span class="flow-arrow">→</span>
+      <span class="fs wait">D-5: WA "sua parcela vence em 5 dias"</span>
+      <span class="flow-arrow">→</span>
+      <span class="fs wait">D-1: WA + link boleto/Pix</span>
+      <span class="flow-arrow">→</span>
+      <span class="fs wait">D+0 vencimento: alerta final</span>
+      <span class="flow-arrow">→</span>
+      <span class="fs branch">Pago? (webhook Asaas)</span>
+      <span class="flow-arrow">→</span>
+      <span class="fs action">Confirma pagamento no CRM</span>
+    </div>
+  </div>
+
+  <div class="sec-label">Fluxo 4 — Pós-evento e reputação</div>
+  <div class="flow-card">
+    <h4>⭐ Trigger: evento marcado como "realizado"</h4>
+    <div class="flow-steps">
+      <span class="fs trigger">Status → Evento Realizado</span>
+      <span class="flow-arrow">→</span>
+      <span class="fs wait">D+1: WA agradecimento</span>
+      <span class="flow-arrow">→</span>
+      <span class="fs wait">D+3: pesquisa satisfação (NPS)</span>
+      <span class="flow-arrow">→</span>
+      <span class="fs branch">NPS ≥ 8?</span>
+      <span class="flow-arrow">→</span>
+      <span class="fs action">Link Google Review</span>
+      <span class="flow-arrow">→</span>
+      <span class="fs wait">M+11: "Novo aniversário?"</span>
+      <span class="flow-arrow">→</span>
+      <span class="fs action">Re-entrada no funil</span>
+    </div>
+  </div>
+
+  <div class="sec-label">Fluxo 5 — Fornecedores</div>
+  <div class="flow-card">
+    <h4>🤝 Trigger: evento confirmado</h4>
+    <div class="flow-steps">
+      <span class="fs trigger">Contrato assinado</span>
+      <span class="flow-arrow">→</span>
+      <span class="fs wait">D-30: e-mail confirmação fornecedor</span>
+      <span class="flow-arrow">→</span>
+      <span class="fs wait">D-7: WA horário chegada + acesso</span>
+      <span class="flow-arrow">→</span>
+      <span class="fs wait">D-1: lembrete final</span>
+      <span class="flow-arrow">→</span>
+      <span class="fs action">Checklist interno equipe</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════════
+     PANEL 4 · FUNIL & SCORING
+════════════════════════════════════════════ -->
+<div class="panel" id="panel-funil">
+
+  <div class="sec-label">Funil de 5 estágios</div>
+  <div class="funnel">
+    <div class="funnel-step">
+      <div class="f-box f1">
+        <span class="f-num">1</span>
+        <span class="f-label">Lead</span>
+      </div>
+      <span class="f-arrow">›</span>
+    </div>
+    <div class="funnel-step">
+      <div class="f-box f2">
+        <span class="f-num">2</span>
+        <span class="f-label">Visita Agendada</span>
+      </div>
+      <span class="f-arrow">›</span>
+    </div>
+    <div class="funnel-step">
+      <div class="f-box f3">
+        <span class="f-num">3</span>
+        <span class="f-label">Proposta Enviada</span>
+      </div>
+      <span class="f-arrow">›</span>
+    </div>
+    <div class="funnel-step">
+      <div class="f-box f4">
+        <span class="f-num">4</span>
+        <span class="f-label">Contrato Assinado</span>
+      </div>
+      <span class="f-arrow">›</span>
+    </div>
+    <div class="funnel-step">
+      <div class="f-box f5">
+        <span class="f-num">5</span>
+        <span class="f-label">Evento Realizado</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec-label" style="margin-top:1.5rem;">Lead Scoring — modelo Python configurável</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:0.5rem;">
+    <div class="flow-card">
+      <h4>📊 Fatores demográficos</h4>
+      <div style="font-size:0.74rem;line-height:1.9;font-family:'DM Mono',monospace;color:var(--ink2);">
+        <div>Data confirmada ........ <strong>+20 pts</strong></div>
+        <div>Evento &lt; 6 meses ....... <strong>+15 pts</strong></div>
+        <div>Orçamento compatível ... <strong>+15 pts</strong></div>
+        <div>Casamento / Corpo. ..... <strong>+10 pts</strong></div>
+        <div>Convidados &gt; 100 ....... <strong>+10 pts</strong></div>
+        <div>Indicação de cliente .... <strong>+15 pts</strong></div>
+      </div>
+    </div>
+    <div class="flow-card">
+      <h4>🖱 Fatores comportamentais</h4>
+      <div style="font-size:0.74rem;line-height:1.9;font-family:'DM Mono',monospace;color:var(--ink2);">
+        <div>Preencheu formulário .... <strong>+10 pts</strong></div>
+        <div>Respondeu WA &lt;1h ...... <strong>+10 pts</strong></div>
+        <div>Agendou visita ......... <strong>+20 pts</strong></div>
+        <div>Visitou o espaço ....... <strong>+25 pts</strong></div>
+        <div>Abriu proposta ......... <strong>+15 pts</strong></div>
+        <div>Visitou site 3x+ ....... <strong>+5 pts</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec-label">Ação por faixa de score</div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem;margin-top:0.5rem;">
+    <div class="flow-card" style="border-left:3px solid #EF4444;">
+      <h4 style="color:#991B1B;">🔴 Score &lt; 30 — Frio</h4>
+      <div style="font-size:0.73rem;color:var(--ink2);line-height:1.7;">
+        Entra em e-mail marketing geral. WA apenas com novidades e datas disponíveis. Cadência mensal.
+      </div>
+    </div>
+    <div class="flow-card" style="border-left:3px solid #F59E0B;">
+      <h4 style="color:#92400E;">🟡 Score 30–59 — Morno</h4>
+      <div style="font-size:0.73rem;color:var(--ink2);line-height:1.7;">
+        Sequência de nutrição automática. WA a cada 15 dias. Convite para tour virtual 360°.
+      </div>
+    </div>
+    <div class="flow-card" style="border-left:3px solid #22C55E;">
+      <h4 style="color:#14532D;">🟢 Score ≥ 60 — Quente</h4>
+      <div style="font-size:0.73rem;color:var(--ink2);line-height:1.7;">
+        Follow-up pessoal imediato. WA em &lt;5 min. Proposta personalizada + convite para visita presencial.
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════════
+     PANEL 5 · CONFIGURAÇÕES (mockup interativo)
+════════════════════════════════════════════ -->
+<div class="panel" id="panel-configuracoes">
+
+  <p style="font-size:0.8rem;color:var(--ink2);margin-bottom:1.25rem;">
+    Todas as integrações são configuráveis pelo gestor neste painel. Nenhuma alteração de código necessária.
+  </p>
+
+  <div class="config-grid">
+
+    <!-- WhatsApp Provider -->
+    <div class="config-card">
+      <h3><span class="icon">💬</span>Provedor WhatsApp</h3>
+      <div class="provider-tabs">
+        <div class="ptab active" id="ptab-evo" onclick="switchProvider('evolution')">Evolution API</div>
+        <div class="ptab" id="ptab-zapi" onclick="switchProvider('zapi')">Z-API</div>
+      </div>
+
+      <div class="provider-detail active" id="pdet-evolution">
+        <div class="field-row">
+          <label>EVOLUTION_API_URL</label>
+          <input type="text" value="http://localhost:8080" />
+        </div>
+        <div class="field-row">
+          <label>EVOLUTION_API_KEY</label>
+          <input type="password" value="••••••••••••••••" />
+        </div>
+        <div class="field-row">
+          <label>INSTANCE_NAME</label>
+          <input type="text" value="sitio-dom-pedro" />
+        </div>
+        <div class="toggle-row">
+          <span>Auto-reconnect QR</span>
+          <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="toggle-row">
+          <span>Webhook receber mensagens</span>
+          <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+        </div>
+      </div>
+
+      <div class="provider-detail" id="pdet-zapi">
+        <div class="field-row">
+          <label>ZAPI_INSTANCE_ID</label>
+          <input type="text" value="3D48F2..." />
+        </div>
+        <div class="field-row">
+          <label>ZAPI_TOKEN</label>
+          <input type="password" value="••••••••••••••••" />
+        </div>
+        <div class="field-row">
+          <label>ZAPI_SECURITY_TOKEN</label>
+          <input type="password" value="••••••••••••••••" />
+        </div>
+        <div class="toggle-row">
+          <span>Confirmação de leitura</span>
+          <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagamentos -->
+    <div class="config-card">
+      <h3><span class="icon">💰</span>Pagamentos — Asaas</h3>
+      <div class="field-row">
+        <label>ASAAS_API_KEY</label>
+        <input type="password" value="••••••••••••••••" />
+      </div>
+      <div class="field-row">
+        <label>AMBIENTE</label>
+        <select>
+          <option>Produção</option>
+          <option>Sandbox</option>
+        </select>
+      </div>
+      <div class="toggle-row">
+        <span>Cobrar via Pix</span>
+        <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+      </div>
+      <div class="toggle-row">
+        <span>Cobrar via Boleto</span>
+        <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+      </div>
+      <div class="toggle-row">
+        <span>Parcelamento cartão</span>
+        <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+      </div>
+      <div class="toggle-row">
+        <span>NFS-e automática</span>
+        <div class="toggle" onclick="this.classList.toggle('on')"></div>
+      </div>
+    </div>
+
+    <!-- Contratos -->
+    <div class="config-card">
+      <h3><span class="icon">📝</span>Contratos — ZapSign</h3>
+      <div class="field-row">
+        <label>ZAPSIGN_API_TOKEN</label>
+        <input type="password" value="••••••••••••••••" />
+      </div>
+      <div class="field-row">
+        <label>TEMPLATE CASAMENTO</label>
+        <input type="text" value="tpl_casamento_v3" />
+      </div>
+      <div class="field-row">
+        <label>TEMPLATE CORPORATIVO</label>
+        <input type="text" value="tpl_corporativo_v2" />
+      </div>
+      <div class="toggle-row">
+        <span>Assinar via WhatsApp</span>
+        <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+      </div>
+      <div class="toggle-row">
+        <span>Enviar por e-mail tb</span>
+        <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+      </div>
+    </div>
+
+    <!-- Automações -->
+    <div class="config-card">
+      <h3><span class="icon">⚙️</span>Automações Python</h3>
+      <div class="toggle-row">
+        <span>Lembretes pré-evento</span>
+        <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+      </div>
+      <div class="toggle-row">
+        <span>Lembretes de cobrança</span>
+        <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+      </div>
+      <div class="toggle-row">
+        <span>Pesquisa pós-evento</span>
+        <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+      </div>
+      <div class="toggle-row">
+        <span>Lembrete aniversário (M+11)</span>
+        <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+      </div>
+      <div class="toggle-row">
+        <span>Alertas internos equipe</span>
+        <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+      </div>
+      <div class="toggle-row">
+        <span>Qualificação IA (OpenAI)</span>
+        <div class="toggle" onclick="this.classList.toggle('on')"></div>
+      </div>
+      <div class="field-row" style="margin-top:0.75rem;">
+        <label>HORÁRIO DISPARO DIÁRIO</label>
+        <input type="text" value="08:00 (America/Belem)" />
+      </div>
+    </div>
+
+  </div>
+
+  <div style="margin-top:1rem;padding:0.85rem 1rem;background:var(--pine-bg);border:1px solid #86EFAC;border-radius:8px;font-size:0.75rem;color:var(--pine);">
+    <strong>🔒 LGPD:</strong> Credenciais armazenadas criptografadas (AES-256) no PostgreSQL. Acesso apenas ao super-admin. Logs de auditoria automáticos em todas as alterações.
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════════
+     PANEL 6 · STACK & CUSTOS
+════════════════════════════════════════════ -->
+<div class="panel" id="panel-stack">
+
+  <table class="stack-table">
+    <thead>
+      <tr>
+        <th>FUNÇÃO</th>
+        <th>FERRAMENTA</th>
+        <th>TECH</th>
+        <th>CUSTO/MÊS</th>
+        <th>IDIOMA</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Backend CRM</td>
+        <td><strong>FastAPI + SQLAlchemy</strong></td>
+        <td><span class="pill pill-py">Python</span></td>
+        <td><span class="pill pill-free">R$0</span></td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td>WhatsApp API</td>
+        <td><strong>Evolution API</strong> (self-hosted)</td>
+        <td><span class="pill pill-api">API</span></td>
+        <td><span class="pill pill-free">~R$0*</span></td>
+        <td>PT-BR</td>
+      </tr>
+      <tr>
+        <td>WhatsApp API (alt.)</td>
+        <td><strong>Z-API</strong> (SaaS)</td>
+        <td><span class="pill pill-api">API</span></td>
+        <td><span class="pill pill-paid">~R$70</span></td>
+        <td>PT-BR</td>
+      </tr>
+      <tr>
+        <td>Automações</td>
+        <td><strong>Celery + APScheduler</strong></td>
+        <td><span class="pill pill-py">Python</span></td>
+        <td><span class="pill pill-free">R$0</span></td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td>Fila / cache</td>
+        <td><strong>Redis</strong></td>
+        <td><span class="pill pill-py">Python</span></td>
+        <td><span class="pill pill-free">R$0*</span></td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td>Banco de dados</td>
+        <td><strong>PostgreSQL</strong></td>
+        <td><span class="pill pill-py">Python</span></td>
+        <td><span class="pill pill-free">R$0*</span></td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td>Pagamentos</td>
+        <td><strong>Asaas</strong></td>
+        <td><span class="pill pill-api">API</span></td>
+        <td><span class="pill pill-paid">~R$50–100</span></td>
+        <td>PT-BR</td>
+      </tr>
+      <tr>
+        <td>Contratos digitais</td>
+        <td><strong>ZapSign</strong></td>
+        <td><span class="pill pill-api">API</span></td>
+        <td><span class="pill pill-paid">R$29,90</span></td>
+        <td>PT-BR</td>
+      </tr>
+      <tr>
+        <td>E-mail transacional</td>
+        <td><strong>SendGrid / SMTP</strong></td>
+        <td><span class="pill pill-api">API</span></td>
+        <td><span class="pill pill-free">R$0–50</span></td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td>IA qualificação</td>
+        <td><strong>OpenAI API</strong> (opcional)</td>
+        <td><span class="pill pill-api">API</span></td>
+        <td><span class="pill pill-paid">~R$50</span></td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td>Deploy infraestrutura</td>
+        <td><strong>Docker Compose · VPS BR</strong></td>
+        <td><span class="pill pill-py">Python</span></td>
+        <td><span class="pill pill-paid">R$80–120</span></td>
+        <td>—</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="cost-section">
+    <div class="sec-label" style="margin-top:1.25rem;">Estimativa mensal — cenários</div>
+    <div class="cost-bar-wrap">
+      <div class="cost-label">Fase 1 (início)</div>
+      <div class="cost-bar"><div class="cost-fill" style="width:18%;background:#67E8F9;"></div></div>
+      <div class="cost-val">~R$130</div>
+    </div>
+    <div class="cost-bar-wrap">
+      <div class="cost-label">Fase 2 (automações)</div>
+      <div class="cost-bar"><div class="cost-fill" style="width:45%;background:#86EFAC;"></div></div>
+      <div class="cost-val">~R$330</div>
+    </div>
+    <div class="cost-bar-wrap">
+      <div class="cost-label">Fase 3 (completo + IA)</div>
+      <div class="cost-bar"><div class="cost-fill" style="width:70%;background:#FCD34D;"></div></div>
+      <div class="cost-val">~R$520</div>
+    </div>
+    <div class="cost-bar-wrap">
+      <div class="cost-label">Stack SaaS equivalente</div>
+      <div class="cost-bar"><div class="cost-fill" style="width:100%;background:#FCA5A5;"></div></div>
+      <div class="cost-val">~R$900</div>
+    </div>
+    <p style="font-size:0.7rem;color:var(--ink3);margin-top:0.5rem;">* VPS inclusa na estimativa de infraestrutura. Evolution API gratuito com VPS própria.</p>
+  </div>
+
+  <div class="sec-label">Fases de implementação</div>
+  <div class="phases">
+    <div class="phase-card ph1">
+      <div class="ph-num">01</div>
+      <h4>Semanas 1–2 · Base</h4>
+      <ul>
+        <li>FastAPI + PostgreSQL + Redis</li>
+        <li>CRM funil 5 estágios</li>
+        <li>Formulário site → lead</li>
+        <li>Evolution API ou Z-API</li>
+        <li>WA automático &lt;2 min</li>
+      </ul>
+    </div>
+    <div class="phase-card ph2">
+      <div class="ph-num">02</div>
+      <h4>Semanas 3–8 · Automações</h4>
+      <ul>
+        <li>Celery Beat lembretes</li>
+        <li>Asaas cobranças recorrentes</li>
+        <li>ZapSign contratos digitais</li>
+        <li>Lead scoring automático</li>
+        <li>Fluxos pós-evento</li>
+      </ul>
+    </div>
+    <div class="phase-card ph3">
+      <div class="ph-num">03</div>
+      <h4>Mês 3+ · Sofisticação</h4>
+      <ul>
+        <li>OpenAI qualificação IA</li>
+        <li>Tour virtual 360° integrado</li>
+        <li>Landing pages segmentadas</li>
+        <li>Dashboard analytics</li>
+        <li>Instagram DM automation</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelector(`[onclick="switchTab('${name}')"]`).classList.add('active');
+  document.getElementById(`panel-${name}`).classList.add('active');
+}
+
+function switchProvider(prov) {
+  document.querySelectorAll('.ptab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.provider-detail').forEach(d => d.classList.remove('active'));
+  document.getElementById(`ptab-${prov === 'evolution' ? 'evo' : 'zapi'}`).classList.add('active');
+  document.getElementById(`pdet-${prov}`).classList.add('active');
+}
+
+function selectProvider(prov) {
+  document.querySelectorAll('.prov-card').forEach(c => c.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+}
+</script>
+</body>
+</html>
