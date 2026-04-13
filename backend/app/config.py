@@ -48,6 +48,9 @@ class Settings(BaseSettings):
     smtp_user: str = ""
     smtp_password: str = ""
 
+    # ── CORS ──
+    cors_origins: str = "http://localhost:5173,http://localhost:5174"
+
     model_config = {"env_file": ".env", "extra": "ignore"}
 
 
