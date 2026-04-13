@@ -10,7 +10,6 @@ import {
 } from 'lucide-react'
 import { contractsApi, eventsApi } from '@/lib/api'
 import type { ContractOut, ContractCreate, ContractUpdate, ContractStatus } from '@/types'
-import { formatDate } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
@@ -704,7 +703,7 @@ export function ContractsPage() {
                   {/* ZapSign */}
                   <TableCell className="text-center">
                     {contract.zapsign_id ? (
-                      <CheckCircle2 className="h-4 w-4 text-green-600 mx-auto" title={`ID: ${contract.zapsign_id}`} />
+                      <span title={`ID: ${contract.zapsign_id}`}><CheckCircle2 className="h-4 w-4 text-green-600 mx-auto" /></span>
                     ) : (
                       <span className="text-muted-foreground text-xs">—</span>
                     )}
